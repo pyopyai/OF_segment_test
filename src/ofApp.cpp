@@ -8,12 +8,16 @@ void ofApp::setup(){
 	ofSetFrameRate(60);
 	//Šp“x‚ğ‰Šú‰»
 	angle = 0;
+	testBeam.set_start(ofVec2f(13, 167));
+	testBeam.set_end(ofVec2f(83, 267));
+
+	ofSetWindowTitle("segment_test");
+	
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
-	//Šp“x‚ğ10‹‘‰Á‚³‚¹‚é
-	angle += 10;
+
 }
 
 //--------------------------------------------------------------
@@ -32,14 +36,8 @@ void ofApp::draw(){
 	glBlendFunc(GL_ONE, GL_ONE);
 	//“h‚è‚ÌF‚ğÔ‚É
 	ofSetColor(255, 0, 0, 63);
-	//‰~‚ğ•`‚­
-	ofEllipse(0, -40, 150, 150);
-	//“h‚è‚ÌF‚ğÂ‚É
-	ofSetColor(0, 0, 255, 63);
-	//‰~‚ğ•`‚­
-	ofEllipse(-40, 40, 150, 150);
-	//“h‚è‚ÌF‚ğ—Î‚É
-	ofSetColor(0, 255, 0, 63);
+
+	ofDrawLine(testBeam.get_start(),testBeam.get_end());
 	//‰~‚ğ•`‚­
 	ofEllipse(40, 40, 150, 150);
 	//À•WŒn‚ğ•œŒ³
