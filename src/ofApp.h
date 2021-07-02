@@ -2,12 +2,14 @@
 
 #include "ofMain.h"
 #include <iostream>
-
+#include <memory>
 #include "GameObject.h"
+#include "Scene.h"
 
 
 class ofApp : public ofBaseApp{
-
+private:
+	std::unique_ptr<Scene> current_scene;
 public:
 	void setup();
 	void update();
