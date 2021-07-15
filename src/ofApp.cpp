@@ -2,6 +2,7 @@
 
 ofPoint circlePos;
 ofColor circleColor;
+Beam testBeam(0, 0);
 
 //--------------------------------------------------------------
 void ofApp::setup(){
@@ -11,12 +12,12 @@ void ofApp::setup(){
 	ofSetFrameRate(60);
 	//Šp“x‚ğ‰Šú‰»
 	angle = 0;
+	
 	ofSetCircleResolution(64); //‰~‚Ì‰ğ‘œ“xİ’è
 
 
 
-	testBeam.start_pos.set(13, 167);
-	testBeam.end_pos.set(53, 167);
+
 
 
 	ofSetWindowTitle("segment_test");
@@ -36,8 +37,8 @@ void ofApp::draw(){
 	//¬F‚ğA‰ÁZ¬F‚É
 	glBlendFunc(GL_ONE, GL_ONE);
 
-	ofSetColor(testBeam.color);
-	ofDrawLine(testBeam.start_pos,testBeam.end_pos);
+	//---- beam draw --
+	testBeam.draw();
 
 
 }
@@ -60,8 +61,7 @@ void ofApp::mouseMoved(int x, int y ){
 //--------------------------------------------------------------
 void ofApp::mouseDragged(int x, int y, int button){
 	//“h‚è‚ğŠDF‚É
-	testBeam.color = ofColor(50,50,50);
-	testBeam.end_pos.set(x, y);
+	testBeam.mouseDragged(x, y);
 }
 
 //--------------------------------------------------------------
@@ -71,8 +71,8 @@ void ofApp::mousePressed(int x, int y, int button){
 
 //--------------------------------------------------------------
 void ofApp::mouseReleased(int x, int y, int button){
-	//“h‚è‚ğÔ‚É
-	testBeam.color = ofColor(255, 0, 0);
+
+	testBeam.mouseReleased();
 
 }
 
