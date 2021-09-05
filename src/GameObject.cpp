@@ -159,6 +159,7 @@ void Beam_Bundle::mouseReleased()
 
 	//ƒvƒŒƒCƒ„[Œğ‘ã
 	now_playing++;
+	Beam_Bundle::next_beam();
 }
 
 
@@ -168,6 +169,9 @@ void Beam_Bundle::next_beam()
 		return;
 	}
 	 active_beam+1 < size(beams) ? active_beam++ : active_beam = 0;
+	 if (now_playing % 2 != beams[active_beam].owner) {
+		 Beam_Bundle::next_beam();
+	 }
 
 }
 
@@ -177,6 +181,9 @@ void Beam_Bundle::previous_beam()
 		return;
 	}
 	active_beam-1 >= 0 ? active_beam-- : active_beam = size(beams)-1;
+	if (now_playing % 2 != beams[active_beam].owner) {
+		Beam_Bundle::previous_beam();
+	}
 
 }
 
