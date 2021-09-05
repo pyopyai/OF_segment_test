@@ -27,6 +27,7 @@ bool Segment::is_crossing(Segment s) {
 	long  tc = (x1 - x2)*(y3 - y1) + (y1 - y2)*(x1 - x3);
 	long  td = (x1 - x2)*(y4 - y1) + (y1 - y2)*(x1 - x4);
 	printf("%d\t%d\t%d\t%d\n%d\t%d\t%d\t%d\n", x1, y1, x2, y2, x3, y3, x4, y4);
+	//そのままta*tbすると値が大きくなりすぎるため
 	ta = ta > 0 ? 1 : -1;
 	tb = tb > 0 ? 1 : -1;
 	tc = tc > 0 ? 1 : -1;
@@ -44,6 +45,8 @@ Beam::Beam(int owner,int battery)
 	this->battery = battery;
 
 	ofVec2f start;
+
+	//4砲台の位置関係
 	switch (this->battery)
 	{
 	case 0:
@@ -67,7 +70,7 @@ Beam::Beam(int owner,int battery)
 
 void Beam::mouseReleased()
 {
-	// 末尾のたね線分を有効化しアクティブに
+	// 末尾線分の色を灰色から変更
 	auto last_segment = this->segments.rbegin();
 	last_segment->is_active = TRUE;
 	switch (this->owner)
@@ -86,12 +89,6 @@ void Beam::mouseReleased()
 	}
 
 
-
-	//末尾に新たね線分追加
-	this->segments.emplace_back(last_segment->end_pos, last_segment->end_pos);
-	auto new_segment = this->segments.rbegin();
-	new_segment->is_active = FALSE;
-	new_segment->color = ofColor(0, 255, 0);
 }
 
 void Beam::draw() 
@@ -102,10 +99,20 @@ void Beam::draw()
 	}
 }
 
-void Beam::mouseDragged(int x, int y) {
+void Beam::mouseDragged(int x, int y,bool is_dragging) {
+	ofVec2f mouse_pos(x, y);
 	auto last_segment = this->segments.rbegin();
-	last_segment->color = ofColor(50, 50, 50);
-	last_segment->end_pos.set(x, y);
+
+	//ドラッグ中のビームがなければ作る、あれば座標を更新
+	if (is_dragging) {
+		last_segment->end_pos = mouse_pos;
+	}
+	else {
+		this->segments.emplace_back(last_segment->end_pos, mouse_pos);
+		auto new_segment = this->segments.rbegin();
+		new_segment->color = ofColor(50, 50, 50);
+	}
+
 }
 
 bool Beam::is_crossing(Segment s) {
@@ -114,6 +121,7 @@ bool Beam::is_crossing(Segment s) {
 		if (iter->is_crossing(s)) {
 			segments.erase(iter+1, segments.end());
 
+			//既存のビームを交差地点まで縮める
 			float r = 1.00;
 			Segment copyed_segment = *iter;
 			do
@@ -136,7 +144,7 @@ Beam_Bundle::Beam_Bundle() {
 	Beam b1(0, 1);
 	Beam b2(1, 2);
 	Beam b3(1, 3);
-
+	//4砲台のビームを作っておく
 	beams = { b0, b1, b2, b3 };
 
 	active_beam = 0;
@@ -151,6 +159,7 @@ void Beam_Bundle::draw()
 	{
 		beam.draw();
 	}
+
 	//アクティブなビームの先端を示すマーカー
 	if (is_dragging) {
 		return;
@@ -161,23 +170,31 @@ void Beam_Bundle::draw()
 }
 
 void Beam_Bundle::mouseDragged(int x, int y) {
-	beams[active_beam].mouseDragged(x, y);
+	beams[active_beam].mouseDragged(x, y,is_dragging);
 	is_dragging = TRUE;
 }
 
 void Beam_Bundle::mouseReleased()
 {
-	if (beams[active_beam].segments.size() == 1)
+	//砲台から直接ビームを伸ばした場合、砲台に新たなビームを補充する
+	if (beams[active_beam].segments.size() == 2)
 	{
 		this->beams.emplace_back(beams[active_beam].owner, beams[active_beam].battery);
 	}
+
 	beams[active_beam].mouseReleased();
 
-	Segment s = *(++beams[active_beam].segments.rbegin());
+	//交差判定
+	Segment s = *(beams[active_beam].segments.rbegin());
 	for (auto &beam : beams) {
+		if (&beam == &beams[active_beam]) {
+			continue;
+		}
 		Beam* beamptr = &beam;
 		beamptr->is_crossing(s);
 	}
+
+
 	is_dragging = FALSE;
 
 	//プレイヤー交代
@@ -185,7 +202,7 @@ void Beam_Bundle::mouseReleased()
 	Beam_Bundle::next_beam();
 }
 
-
+//伸ばすビームを選択
 void Beam_Bundle::next_beam()
 {	
 	if (is_dragging) {

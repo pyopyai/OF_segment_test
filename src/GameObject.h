@@ -48,7 +48,7 @@ public:
 	ofVec2f start_pos;
 	void mouseReleased();
 	void draw();
-	void mouseDragged(int x, int y);
+	void mouseDragged(int x, int y,bool is_dragging);
 	bool is_crossing(Segment s);
 };
 
