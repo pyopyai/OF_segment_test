@@ -2,7 +2,8 @@
 
 ofPoint circlePos;
 ofColor circleColor;
-Beam testBeam(0, 0);
+
+
 
 //--------------------------------------------------------------
 void ofApp::setup(){
@@ -18,10 +19,8 @@ void ofApp::setup(){
 
 
 
-
-
 	ofSetWindowTitle("segment_test");
-	
+
 }
 
 //--------------------------------------------------------------
@@ -32,20 +31,29 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
 
-	//アルファチャンネル(透明度)を使用可能に
-	ofEnableAlphaBlending();
-	//混色を、加算混色に
-	glBlendFunc(GL_ONE, GL_ONE);
-
-	//---- beam draw --
-	testBeam.draw();
 
 
+	beam_bundle.draw();
+
+
+
+	
 }
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
+	switch (key) {
+	case OF_KEY_LEFT:
+		beam_bundle.previous_beam();
+		break;
+	case OF_KEY_RIGHT:
+		beam_bundle.next_beam();
+		break;
+	case OF_KEY_ALT:
+		beam_bundle.erase_beam();
+		break;
 
+	}
 }
 
 //--------------------------------------------------------------
@@ -60,8 +68,7 @@ void ofApp::mouseMoved(int x, int y ){
 
 //--------------------------------------------------------------
 void ofApp::mouseDragged(int x, int y, int button){
-	//塗りを灰色に
-	testBeam.mouseDragged(x, y);
+	beam_bundle.mouseDragged(x, y);
 }
 
 //--------------------------------------------------------------
@@ -72,8 +79,7 @@ void ofApp::mousePressed(int x, int y, int button){
 //--------------------------------------------------------------
 void ofApp::mouseReleased(int x, int y, int button){
 
-	testBeam.mouseReleased();
-
+	beam_bundle.mouseReleased();
 }
 
 //--------------------------------------------------------------

@@ -31,8 +31,9 @@ public:
 	ofColor color;
 	bool is_active;
 	void draw();
-
+	bool is_crossing(Segment s);
 };
+
 
 class Beam :public GameObject
 {
@@ -48,4 +49,24 @@ public:
 	void mouseReleased();
 	void draw();
 	void mouseDragged(int x, int y);
+	bool is_crossing(Segment s);
+};
+
+class Beam_Bundle :public GameObject
+{
+private:
+
+
+public:
+	Beam_Bundle();
+	std::vector<Beam> beams;
+	int now_playing;
+	int active_beam;
+	void mouseReleased();
+	void draw();
+	void mouseDragged(int x, int y);
+	void next_beam();
+	void previous_beam();
+	bool is_dragging;
+	void erase_beam();
 };

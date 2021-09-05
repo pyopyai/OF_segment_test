@@ -28,4 +28,7 @@ public:
 	void gotMessage(ofMessage msg);
 	
 	int angle;
+	
+	Beam_Bundle beam_bundle;
+
 };
