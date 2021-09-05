@@ -22,11 +22,20 @@ void Segment::draw()
 bool Segment::is_crossing(Segment s) {
 	int x1 = this->start_pos.x, x2 = this->end_pos.x ,x3 = s.start_pos.x, x4 = s.end_pos.x;
 	int y1 = this->start_pos.y, y2 = this->end_pos.y, y3 = s.start_pos.y, y4 = s.end_pos.y;
-	int ta = (x3 - x4)*(y1 - y3) + (y3 - y4)*(x3 - x1);
-	int tb = (x3 - x4)*(y2 - y3) + (y3 - y4)*(x3 - x2);
-	int tc = (x1 - x2)*(y3 - y1) + (y1 - y2)*(x1 - x3);
-	int td = (x1 - x2)*(y4 - y1) + (y1 - y2)*(x1 - x4);
-	return ta * tb < 0 && tc*td < 0;
+	long  ta = (x3 - x4)*(y1 - y3) + (y3 - y4)*(x3 - x1);
+	long  tb = (x3 - x4)*(y2 - y3) + (y3 - y4)*(x3 - x2);
+	long  tc = (x1 - x2)*(y3 - y1) + (y1 - y2)*(x1 - x3);
+	long  td = (x1 - x2)*(y4 - y1) + (y1 - y2)*(x1 - x4);
+	printf("%d\t%d\t%d\t%d\n%d\t%d\t%d\t%d\n", x1, y1, x2, y2, x3, y3, x4, y4);
+	ta = ta > 0 ? 1 : -1;
+	tb = tb > 0 ? 1 : -1;
+	tc = tc > 0 ? 1 : -1;
+	td = td > 0 ? 1 : -1;
+
+
+	bool is_cross = ta * tb < 0 && tc * td < 0;
+	printf("%d\n", is_cross);
+	return is_cross;
 }
 
 Beam::Beam(int owner,int battery)
@@ -103,7 +112,20 @@ bool Beam::is_crossing(Segment s) {
 	for (auto iter = segments.begin(); iter != segments.end(); ++iter)
 	{
 		if (iter->is_crossing(s)) {
-			segments.erase(iter, segments.end());
+			segments.erase(iter+1, segments.end());
+
+			float r = 1.00;
+			Segment copyed_segment = *iter;
+			do
+			{
+				copyed_segment.end_pos = r * (iter->end_pos - iter->start_pos) + iter->start_pos;
+				r -= 0.01;
+			} while (copyed_segment.is_crossing(s) && r > 0);
+
+			iter->end_pos = copyed_segment.end_pos;
+
+			//segments.clear();
+			printf("clear%d\n",this->segments.size());
 			return TRUE;
 		}
 	}
@@ -151,9 +173,10 @@ void Beam_Bundle::mouseReleased()
 	}
 	beams[active_beam].mouseReleased();
 
-	Segment s = *beams[active_beam].segments.rbegin();
-	for (Beam beam : beams) {
-		beam.is_crossing(s);
+	Segment s = *(++beams[active_beam].segments.rbegin());
+	for (auto &beam : beams) {
+		Beam* beamptr = &beam;
+		beamptr->is_crossing(s);
 	}
 	is_dragging = FALSE;
 
