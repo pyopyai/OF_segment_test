@@ -49,9 +49,6 @@ void ofApp::keyPressed(int key){
 	case OF_KEY_RIGHT:
 		beam_bundle.next_beam();
 		break;
-	case OF_KEY_ALT:
-		beam_bundle.erase_beam();
-		break;
 
 	}
 }

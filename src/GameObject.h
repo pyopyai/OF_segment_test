@@ -32,6 +32,7 @@ public:
 
 	void draw();
 	bool is_crossing(Segment s);
+	int squared_length();
 };
 
 
@@ -72,4 +73,14 @@ public:
 	void previous_beam();
 	bool is_dragging;
 	void erase_beam();
+};
+
+class Battery :public GameObject
+{
+private:
+
+public:
+	int owner;
+	int radius = 10;
+	ofVec2f pos;
 };

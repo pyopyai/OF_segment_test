@@ -11,6 +11,12 @@ Segment::Segment(ofVec2f start, ofVec2f end)
 	this->end_pos.set(end);
 }
 
+int Segment::squared_length()
+{
+	return start_pos.distanceSquared(end_pos);
+}
+
+
 void Segment::draw()
 {
 	ofSetColor(this->color);
@@ -102,16 +108,20 @@ void Beam::mouseDragged(int x, int y,bool is_dragging) {
 	ofVec2f mouse_pos(x, y);
 	auto last_segment = this->segments.rbegin();
 
+
 	//ドラッグ中のビームがなければ作る、あれば座標を更新
 	if (is_dragging) {
 		last_segment->end_pos = mouse_pos;
 	}
 	else {
 		this->segments.emplace_back(last_segment->end_pos, mouse_pos);
-		auto new_segment = this->segments.rbegin();
-		new_segment->color = ofColor(50, 50, 50);
+		last_segment = this->segments.rbegin();
+		last_segment->color = ofColor(50, 50, 50);
 	}
-
+	while (last_segment->squared_length() > 250*250)
+	{
+		last_segment->end_pos = 0.99*(last_segment->end_pos - last_segment->start_pos) + last_segment->start_pos;
+	}
 }
 
 bool Beam::is_crossing(Segment s,bool is_cutting) {
