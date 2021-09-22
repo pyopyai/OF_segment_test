@@ -72,7 +72,6 @@ void Beam::mouseReleased()
 {
 	// 末尾線分の色を灰色から変更
 	auto last_segment = this->segments.rbegin();
-	last_segment->is_active = TRUE;
 	switch (this->owner)
 	{
 	case 0:
@@ -115,25 +114,32 @@ void Beam::mouseDragged(int x, int y,bool is_dragging) {
 
 }
 
-bool Beam::is_crossing(Segment s) {
+bool Beam::is_crossing(Segment s,bool is_cutting) {
 	for (auto iter = segments.begin(); iter != segments.end(); ++iter)
 	{
 		if (iter->is_crossing(s)) {
-			segments.erase(iter+1, segments.end());
-
-			//既存のビームを交差地点まで縮める
-			float r = 1.00;
-			Segment copyed_segment = *iter;
-			do
+			if (is_cutting)
 			{
-				copyed_segment.end_pos = r * (iter->end_pos - iter->start_pos) + iter->start_pos;
-				r -= 0.01;
-			} while (copyed_segment.is_crossing(s) && r > 0);
+				segments.erase(iter + 1, segments.end());
 
-			iter->end_pos = copyed_segment.end_pos;
+				//既存のビームを交差地点まで縮める
+				float r = 1.00;
+				Segment copyed_segment = *iter;
+				ofVec2f old_end_pos;
+				do
+				{
+					old_end_pos = copyed_segment.end_pos;
+					r -= 0.01;
+					copyed_segment.end_pos = r * (iter->end_pos - iter->start_pos) + iter->start_pos;
+				} while (copyed_segment.is_crossing(s) && r > 0);
 
-			//segments.clear();
-			printf("clear%d\n",this->segments.size());
+				iter->end_pos = copyed_segment.end_pos;
+				this->extended_end_pos = old_end_pos;
+
+				//segments.clear();
+				printf("clear%d\n", this->segments.size());
+			}
+
 			return TRUE;
 		}
 	}
@@ -191,7 +197,7 @@ void Beam_Bundle::mouseReleased()
 			continue;
 		}
 		Beam* beamptr = &beam;
-		beamptr->is_crossing(s);
+		beamptr->is_crossing(s,true);
 	}
 
 
@@ -205,26 +211,59 @@ void Beam_Bundle::mouseReleased()
 //伸ばすビームを選択
 void Beam_Bundle::next_beam()
 {	
-	if (is_dragging) {
-		return;
-	}
-	 active_beam+1 < size(beams) ? active_beam++ : active_beam = 0;
-	 if (now_playing % 2 != beams[active_beam].owner) {
-		 Beam_Bundle::next_beam();
-	 }
+	if (is_dragging) return;
 
+	 active_beam+1 < size(beams) ? active_beam++ : active_beam = 0;
+
+	//自分のビームか判定
+	 if (now_playing % 2 != beams[active_beam].owner) Beam_Bundle::next_beam();
+
+	//現在先端が止められているか否かを判定
+	bool f_crossing = false;
+	if (beams[active_beam].extended_end_pos != ofVec2f(-100,-100)) {
+		Segment s(beams[active_beam].segments.rbegin()->end_pos, beams[active_beam].extended_end_pos);
+		for (auto &beam : beams) {
+			if (&beam == &beams[active_beam]) {
+				continue;
+			}
+			Beam* beamptr = &beam;
+			if (beamptr->is_crossing(s, false))
+			{
+				f_crossing = true;
+				break;
+			}
+		}
+	}
+	if (f_crossing) Beam_Bundle::next_beam();
+	
 }
 
 void Beam_Bundle::previous_beam()
 {
-	if (is_dragging) {
-		return;
-	}
-	active_beam-1 >= 0 ? active_beam-- : active_beam = size(beams)-1;
-	if (now_playing % 2 != beams[active_beam].owner) {
-		Beam_Bundle::previous_beam();
-	}
+	if (is_dragging) return;
 
+	active_beam-1 >= 0 ? active_beam-- : active_beam = size(beams)-1;
+
+	//自分のビームか判定
+	if (now_playing % 2 != beams[active_beam].owner) Beam_Bundle::previous_beam();
+
+	//現在先端が止められているか否かを判定
+	bool f_crossing = false;
+	if (beams[active_beam].extended_end_pos != ofVec2f(-100, -100)) {
+		Segment s(beams[active_beam].segments.rbegin()->end_pos, beams[active_beam].extended_end_pos);
+		for (auto &beam : beams) {
+			if (&beam == &beams[active_beam]) {
+				continue;
+			}
+			Beam* beamptr = &beam;
+			if (beamptr->is_crossing(s, false))
+			{
+				f_crossing = true;
+				break;
+			}
+		}
+	}
+	if (f_crossing) Beam_Bundle::previous_beam();
 }
 
 void Beam_Bundle::erase_beam()

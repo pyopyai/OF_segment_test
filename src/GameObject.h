@@ -29,7 +29,7 @@ public:
 	ofVec2f start_pos;
 	ofVec2f end_pos;
 	ofColor color;
-	bool is_active;
+
 	void draw();
 	bool is_crossing(Segment s);
 };
@@ -45,11 +45,14 @@ public:
 	Beam(int owner, int battery);
 	int owner;
 	int battery;
+	// Segment* crossed_segment = nullptr;
 	ofVec2f start_pos;
+	ofVec2f extended_end_pos = ofVec2f(-100,-100);
 	void mouseReleased();
 	void draw();
 	void mouseDragged(int x, int y,bool is_dragging);
-	bool is_crossing(Segment s);
+	bool is_crossing(Segment s, bool is_cutting);
+
 };
 
 class Beam_Bundle :public GameObject
